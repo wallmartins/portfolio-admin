@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
+  srcDir: 'app/',
 
   modules: [
     '@nuxtjs/tailwindcss',
@@ -16,14 +17,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    // Private keys (only available server-side)
-    githubClientSecret: process.env.GITHUB_CLIENT_SECRET,
-
     // Public keys (exposed to client)
     public: {
-      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:9500',
-      aiApiUrl: process.env.NUXT_PUBLIC_AI_API_URL || 'http://localhost:3001',
-      githubClientId: process.env.NUXT_PUBLIC_GITHUB_CLIENT_ID || ''
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || 'http://localhost:9501',
+      aiApiUrl: process.env.NUXT_PUBLIC_AI_API_URL || 'http://localhost:3001'
     }
   },
 

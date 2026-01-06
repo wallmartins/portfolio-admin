@@ -17,6 +17,124 @@
 - Entity relationships (Posts/Projects ↔ Techs)
 - Pagination (public routes)
 
+## API Endpoint Reference
+
+**Base URL:** `http://localhost:9501`
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/auth/github/redirect` | Redirects to GitHub OAuth authorization | No |
+| GET | `/auth/github/callback?code={code}` | Handles GitHub OAuth callback, returns JWT | No |
+
+**Auth Response:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "accessToken": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "avatar": "https://avatars.githubusercontent.com/u/123456"
+}
+```
+
+### Admin Endpoints (Require Bearer Token)
+
+#### About
+| Method | Endpoint | Content-Type | Body Fields |
+|--------|----------|--------------|-------------|
+| POST | `/admin/about` | multipart/form-data | `title`, `description`, `image` (file), `locale` (pt-BR/en-US) |
+| PUT | `/admin/about/{id}` | multipart/form-data | `title?`, `description?`, `image?` (file), `locale?` |
+| DELETE | `/admin/about/{id}` | - | - |
+
+#### Experiences
+| Method | Endpoint | Content-Type | Body Fields |
+|--------|----------|--------------|-------------|
+| POST | `/admin/experiences` | application/json | `company`, `role`, `start_date`, `end_date?`, `translations[]` |
+| PUT | `/admin/experiences/{id}` | application/json | `locale`, `company?`, `role?`, `start_date?`, `end_date?`, `translations?[]` |
+| DELETE | `/admin/experiences/{id}` | - | - |
+
+**Translation object:**
+```json
+{
+  "locale": "pt-BR" | "en-US",
+  "description": "Job description..."
+}
+```
+
+#### Blog Posts
+| Method | Endpoint | Content-Type | Body Fields |
+|--------|----------|--------------|-------------|
+| POST | `/admin/posts` | multipart/form-data | `slug`, `image` (file/URL), `translations[]`, `tech_ids[]` |
+| PUT | `/admin/posts/{id}` | multipart/form-data | `locale`, `slug?`, `image?` (file/URL), `translations?[]`, `tech_ids?[]` |
+| DELETE | `/admin/posts/{id}` | - | - |
+
+**Post Translation object:**
+```json
+{
+  "locale": "pt-BR" | "en-US",
+  "title": "Post title",
+  "subtitle": "Optional subtitle",
+  "content": "Markdown or HTML content..."
+}
+```
+
+#### Projects
+| Method | Endpoint | Content-Type | Body Fields |
+|--------|----------|--------------|-------------|
+| POST | `/admin/projects` | multipart/form-data | `name`, `slug`, `image` (file/URL), `translations[]`, `techs.ids[]` |
+| PUT | `/admin/projects/{id}` | multipart/form-data | `locale`, `name?`, `slug?`, `image?` (file/URL), `translations?[]`, `techs?` |
+| DELETE | `/admin/projects/{id}` | - | - |
+
+**Project Translation object:**
+```json
+{
+  "locale": "pt-BR" | "en-US",
+  "title": "Project title",
+  "content": "Project description..."
+}
+```
+
+#### Social Media Links
+| Method | Endpoint | Content-Type | Body Fields |
+|--------|----------|--------------|-------------|
+| POST | `/admin/social` | application/json | `social_name`, `social_url` |
+| PUT | `/admin/social/{id}` | application/json | `social_name?`, `social_url?` |
+| DELETE | `/admin/social/{id}` | - | - |
+
+#### Technologies
+| Method | Endpoint | Content-Type | Body Fields |
+|--------|----------|--------------|-------------|
+| POST | `/admin/techs` | application/json | `slug`, `name`, `start_date`, `category` (language/framework/tool) |
+| PUT | `/admin/techs/{id}` | application/json | `slug?`, `name?`, `start_date?`, `category?` |
+| DELETE | `/admin/techs/{id}` | - | - |
+
+### Public Portfolio Endpoints (No Auth)
+
+| Method | Endpoint | Query Params | Description |
+|--------|----------|--------------|-------------|
+| GET | `/portfolio/about` | `locale` (required) | Get about information |
+| GET | `/portfolio/experiences` | `locale` (required) | Get all experiences |
+| GET | `/portfolio/blog` | `locale` (required), `page?` (default: 1), `per_page?` (default: 15) | Get paginated blog posts |
+| GET | `/portfolio/blog/{id}` | `locale` (required) | Get specific blog post |
+| GET | `/portfolio/projects` | `locale` (required), `page?` (default: 1), `per_page?` (default: 10) | Get paginated projects |
+| GET | `/portfolio/projects/{id}` | `locale` (required) | Get specific project |
+| GET | `/portfolio/social` | - | Get all social media links |
+| GET | `/portfolio/techs` | - | Get all technologies |
+
+**Pagination Response Format:**
+```json
+{
+  "data": [...],
+  "meta": {
+    "current_page": 1,
+    "last_page": 5,
+    "per_page": 15,
+    "total": 72
+  }
+}
+```
+
 ## Recommended Technology Stack
 
 ### Core Framework: **Nuxt 3 + TypeScript**
@@ -178,23 +296,42 @@ portfolio-admin/
 - `app/layouts/auth.vue` - Auth layout (login page)
 
 ### Phase 2: Authentication System
-**Goal:** Implement GitHub OAuth flow
+**Goal:** Implement GitHub OAuth flow using backend API
+
+**Authentication Flow:**
+1. User clicks "Login with GitHub" → Frontend redirects to `GET /auth/github/redirect` (backend API)
+2. Backend redirects to GitHub OAuth authorization page
+3. GitHub redirects back to `GET /auth/github/callback?code=xxx` (backend API)
+4. Backend API exchanges code for GitHub token, creates/updates user, returns JWT
+5. Frontend receives: `{ name, email, accessToken, avatar }`
+6. Frontend stores JWT in localStorage and uses it for all authenticated requests
+
+**API Endpoints Used:**
+- `GET http://localhost:9501/auth/github/redirect` - Initiates OAuth flow
+- `GET http://localhost:9501/auth/github/callback?code={code}` - Handles callback, returns JWT
 
 **Tasks:**
-1. Create GitHub OAuth redirect handler (`/auth/github/redirect`)
-2. Create OAuth callback handler (`/auth/github/callback`)
-3. Implement auth composable (`useAuth`)
-4. Create auth middleware for protected routes
-5. Design and build login page
-6. Implement token refresh logic
-7. Add logout functionality
+1. Implement auth composable (`useAuth`) with GitHub OAuth flow
+2. Create auth callback page to receive token from backend
+3. Create auth middleware for protected routes
+4. Design and build login page
+5. Add logout functionality (clear local storage + redirect)
+6. Add auth state persistence (localStorage)
+7. Add auth initialization on app load
 
 **Files to create:**
-- `server/api/auth/github-redirect.get.ts`
-- `server/api/auth/github-callback.get.ts`
-- `composables/useAuth.ts`
-- `middleware/auth.global.ts`
-- `pages/login.vue`
+- `composables/useAuth.ts` - Auth state management and OAuth flow
+- `middleware/auth.global.ts` - Route protection
+- `middleware/guest.ts` - Redirect authenticated users from login page
+- `pages/login.vue` - Login page with GitHub button
+- `pages/auth/callback.vue` - Handle OAuth callback and extract token
+- `plugins/auth.client.ts` - Initialize auth state on app load
+
+**Important Notes:**
+- ❌ **No server routes needed** - Backend API handles entire OAuth flow
+- ❌ **No GitHub credentials in frontend** - Backend manages client ID/secret
+- ✅ Frontend only needs to redirect to backend OAuth endpoints
+- ✅ JWT token stored in localStorage (or httpOnly cookies if backend supports it)
 
 ### Phase 3: Core API Integration
 **Goal:** Setup API client and data fetching patterns
@@ -712,7 +849,7 @@ export function useApi() {
   const auth = useAuth()
 
   const api = $fetch.create({
-    baseURL: 'http://localhost:9500',
+    baseURL: 'http://localhost:9501',
     headers: {
       Authorization: `Bearer ${auth.token.value}`
     }
@@ -760,14 +897,10 @@ export default defineEventHandler(async (event) => {
 
 ```env
 # Portfolio API (main backend)
-NUXT_PUBLIC_API_URL=http://localhost:9500
+NUXT_PUBLIC_API_URL=http://localhost:9501
 
 # AI API (separate backend service)
 NUXT_PUBLIC_AI_API_URL=http://localhost:PORT_DO_BACKEND_IA
-
-# Auth
-NUXT_PUBLIC_GITHUB_CLIENT_ID=your_github_client_id
-GITHUB_CLIENT_SECRET=your_github_secret
 
 # Monitoring (Optional - can add later)
 SENTRY_DSN=https://...
@@ -776,7 +909,9 @@ SENTRY_DSN=https://...
 VERCEL_URL=auto-set-by-vercel
 ```
 
-**Note:** No AI API keys needed in frontend - they stay in the separate AI backend service.
+**Note:**
+- No GitHub OAuth credentials needed in frontend - the backend API handles OAuth flow entirely
+- No AI API keys needed in frontend - they stay in the separate AI backend service
 
 ## Success Criteria
 
