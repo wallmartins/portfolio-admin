@@ -1,0 +1,28 @@
+# Nuxt
+.nuxt
+.output
+.env
+.env.*
+!.env.example
+dist
+
+# Node
+node_modules
+*.log*
+.DS_Store
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Testing
+coverage
+.nyc_output
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
