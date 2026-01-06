@@ -1,29 +1,30 @@
-import type { UseFetchOptions } from 'nuxt/app'
-
 export const useApi = () => {
   const config = useRuntimeConfig()
-  const { token } = useAuth()
+  const auth = useAuth()
 
   // Create authenticated fetch instance
   const apiFetch = $fetch.create({
     baseURL: config.public.apiUrl,
-    headers: {
-      'Content-Type': 'application/json'
-    },
     onRequest({ options }) {
+      // Set default headers
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      }
+
       // Add auth token if available
-      if (token.value) {
-        options.headers = {
-          ...options.headers,
-          Authorization: `Bearer ${token.value}`
-        }
+      if (auth.token.value) {
+        headers.Authorization = `Bearer ${auth.token.value}`
+      }
+
+      options.headers = {
+        ...headers,
+        ...options.headers
       }
     },
     onResponseError({ response }) {
       // Handle common errors
       if (response.status === 401) {
-        const { clearAuth } = useAuth()
-        clearAuth()
+        auth.clearAuth()
         navigateTo('/login')
       }
 
@@ -41,28 +42,7 @@ export const useApi = () => {
     }
   })
 
-  // Wrapper for useFetch with auth
-  const useApiFetch = <T>(url: string, options?: UseFetchOptions<T>) => {
-    return useFetch<T>(url, {
-      ...options,
-      baseURL: config.public.apiUrl,
-      headers: {
-        ...options?.headers,
-        ...(token.value ? { Authorization: `Bearer ${token.value}` } : {})
-      },
-      watch: [token],
-      onResponseError({ response }) {
-        if (response.status === 401) {
-          const { clearAuth } = useAuth()
-          clearAuth()
-          navigateTo('/login')
-        }
-      }
-    })
-  }
-
   return {
-    api: apiFetch,
-    useApiFetch
+    api: apiFetch
   }
 }

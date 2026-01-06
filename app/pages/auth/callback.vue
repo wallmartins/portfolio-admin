@@ -8,14 +8,22 @@
         </CardDescription>
       </CardHeader>
       <CardContent class="flex justify-center py-8">
-        <div class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <div
+          class="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"
+        ></div>
       </CardContent>
     </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent
+} from '~/components/ui/card'
 
 definePageMeta({
   layout: 'auth'

@@ -42,7 +42,13 @@
 </template>
 
 <script setup lang="ts">
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '~/components/ui/card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent
+} from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 
@@ -57,11 +63,15 @@ const isLoading = ref(false)
 const error = ref('')
 
 // Redirect if already authenticated
-watch(isAuthenticated, (value) => {
-  if (value) {
-    router.push('/')
-  }
-}, { immediate: true })
+watch(
+  isAuthenticated,
+  value => {
+    if (value) {
+      router.push('/')
+    }
+  },
+  { immediate: true }
+)
 
 const handleGitHubLogin = () => {
   try {
