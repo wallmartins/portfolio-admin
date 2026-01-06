@@ -1,10 +1,17 @@
-import type { AuthResponse, User } from '~/types/api'
+import type { User } from '~/types/api'
 
 interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
   isLoading: boolean
+}
+
+interface AuthCallbackResponse {
+  name: string
+  email: string
+  accessToken: string
+  avatar: string
 }
 
 export const useAuth = () => {
@@ -43,45 +50,50 @@ export const useAuth = () => {
     }
   }
 
-  // Login with GitHub OAuth
+  // Login with GitHub OAuth - Redirect to backend API
   const loginWithGitHub = () => {
-    const githubClientId = config.public.githubClientId
-    const redirectUri = `${window.location.origin}/auth/callback`
-    const state = Math.random().toString(36).substring(7)
+    // Store return URL for after auth
+    if (import.meta.client) {
+      localStorage.setItem('auth_return_url', window.location.pathname)
+    }
 
-    // Store state for verification
-    localStorage.setItem('oauth_state', state)
-
-    // Redirect to GitHub OAuth
-    const authUrl = `https://github.com/login/oauth/authorize?client_id=${githubClientId}&redirect_uri=${redirectUri}&state=${state}&scope=user:email`
-    window.location.href = authUrl
+    // Redirect to backend OAuth endpoint
+    // Backend will redirect to GitHub, then handle callback
+    window.location.href = `${config.public.apiUrl}/auth/github/redirect`
   }
 
-  // Handle OAuth callback
-  const handleCallback = async (code: string, state: string) => {
+  // Handle OAuth callback from backend
+  const handleCallback = async (queryParams: URLSearchParams) => {
     try {
-      // Verify state
-      const storedState = localStorage.getItem('oauth_state')
-      if (state !== storedState) {
-        throw new Error('Invalid state parameter')
+      // Extract auth data from URL hash or query params
+      // Backend should redirect to /auth/callback with token data
+      const authData = queryParams.get('auth_data')
+
+      if (!authData) {
+        throw new Error('No auth data received from backend')
       }
 
-      // Exchange code for token via backend
-      const response = await $fetch<AuthResponse>('/api/auth/github-callback', {
-        method: 'POST',
-        body: { code }
-      })
+      // Parse auth response from backend
+      const response: AuthCallbackResponse = JSON.parse(decodeURIComponent(authData))
+
+      // Create user object
+      const user: User = {
+        id: 0, // Backend doesn't return ID in callback
+        name: response.name,
+        email: response.email,
+        avatar_url: response.avatar
+      }
 
       // Store auth data
-      setAuth(response.token, response.user)
+      setAuth(response.accessToken, user)
 
-      // Clean up
-      localStorage.removeItem('oauth_state')
+      // Get return URL and redirect
+      const returnUrl = localStorage.getItem('auth_return_url') || '/'
+      localStorage.removeItem('auth_return_url')
 
-      // Redirect to dashboard
-      await router.push('/')
+      await router.push(returnUrl)
 
-      return response
+      return { token: response.accessToken, user }
     } catch (error) {
       console.error('Auth callback error:', error)
       clearAuth()
@@ -116,7 +128,7 @@ export const useAuth = () => {
     if (import.meta.client) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
-      localStorage.removeItem('oauth_state')
+      localStorage.removeItem('auth_return_url')
     }
   }
 
@@ -124,30 +136,6 @@ export const useAuth = () => {
   const logout = async () => {
     clearAuth()
     await router.push('/login')
-  }
-
-  // Refresh user data
-  const refreshUser = async () => {
-    try {
-      if (!authState.value.token) return
-
-      const user = await $fetch<User>('/api/auth/me', {
-        headers: {
-          Authorization: `Bearer ${authState.value.token}`
-        }
-      })
-
-      authState.value.user = user
-      if (import.meta.client) {
-        localStorage.setItem('auth_user', JSON.stringify(user))
-      }
-
-      return user
-    } catch (error) {
-      console.error('Failed to refresh user:', error)
-      clearAuth()
-      throw error
-    }
   }
 
   return {
@@ -162,7 +150,6 @@ export const useAuth = () => {
     loginWithGitHub,
     handleCallback,
     logout,
-    refreshUser,
     setAuth,
     clearAuth
   }
