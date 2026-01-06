@@ -8,77 +8,68 @@
 // Base Entity Types
 export interface About {
   id: number
-  name: string
-  bio: string
-  image?: string
+  title: string
+  description: string
+  image?: string | null
+  locale: 'pt-BR' | 'en-US'
   created_at: string
   updated_at: string
-  translations: AboutTranslation[]
-}
-
-export interface AboutTranslation {
-  id?: number
-  locale: 'pt-BR' | 'en-US'
-  name: string
-  bio: string
 }
 
 export interface Experience {
   id: number
   company: string
-  role: string
   start_date: string
   end_date?: string | null
+  title: string
+  description: string
+  locale: 'pt-BR' | 'en-US'
   created_at: string
   updated_at: string
-  translations: ExperienceTranslation[]
 }
 
 export interface ExperienceTranslation {
-  id?: number
   locale: 'pt-BR' | 'en-US'
-  company: string
-  role: string
-  description?: string
+  description: string
 }
 
 export interface Post {
   id: number
   slug: string
-  image?: string
+  image?: string | null
+  title: string
+  subtitle?: string | null
+  content: string
+  locale: 'pt-BR' | 'en-US'
   created_at: string
   updated_at: string
-  translations: PostTranslation[]
   techs?: Tech[]
-  tech_ids?: number[]
 }
 
 export interface PostTranslation {
-  id?: number
   locale: 'pt-BR' | 'en-US'
   title: string
+  subtitle?: string | null
   content: string
-  description?: string
 }
 
 export interface Project {
   id: number
+  name: string
   slug: string
-  image?: string
-  github_url?: string
-  demo_url?: string
+  image?: string | null
+  title: string
+  content: string
+  locale: 'pt-BR' | 'en-US'
   created_at: string
   updated_at: string
-  translations: ProjectTranslation[]
   techs?: Tech[]
-  tech_ids?: number[]
 }
 
 export interface ProjectTranslation {
-  id?: number
   locale: 'pt-BR' | 'en-US'
   title: string
-  description: string
+  content: string
 }
 
 export interface Social {
@@ -145,16 +136,21 @@ export type CreateExperienceDTO = Omit<Experience, 'id' | 'created_at' | 'update
 
 export type UpdateExperienceDTO = Partial<CreateExperienceDTO>
 
-export type CreatePostDTO = Omit<Post, 'id' | 'created_at' | 'updated_at' | 'techs'> & {
+export type CreatePostDTO = {
+  slug: string
   image?: File
   tech_ids: number[]
+  translations: PostTranslation[]
 }
 
 export type UpdatePostDTO = Partial<CreatePostDTO>
 
-export type CreateProjectDTO = Omit<Project, 'id' | 'created_at' | 'updated_at' | 'techs'> & {
+export type CreateProjectDTO = {
+  name: string
+  slug: string
   image?: File
   tech_ids: number[]
+  translations: ProjectTranslation[]
 }
 
 export type UpdateProjectDTO = Partial<CreateProjectDTO>
