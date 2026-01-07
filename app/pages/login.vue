@@ -73,14 +73,17 @@ watch(
   { immediate: true }
 )
 
-const handleGitHubLogin = () => {
+const handleGitHubLogin = async () => {
   try {
     isLoading.value = true
     error.value = ''
-    loginWithGitHub()
-  } catch (err) {
+
+    await loginWithGitHub()
+
+    // Success - will be redirected by watch on isAuthenticated
+  } catch (err: any) {
     console.error('Login error:', err)
-    error.value = 'Failed to initiate GitHub login. Please try again.'
+    error.value = err.message || 'Failed to complete GitHub login. Please try again.'
     isLoading.value = false
   }
 }

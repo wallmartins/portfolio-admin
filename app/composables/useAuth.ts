@@ -50,55 +50,67 @@ export const useAuth = () => {
     }
   }
 
-  // Login with GitHub OAuth - Redirect to backend API
+  // Login with GitHub OAuth - Open popup window
   const loginWithGitHub = () => {
-    // Store return URL for after auth
-    if (import.meta.client) {
-      localStorage.setItem('auth_return_url', window.location.pathname)
-    }
+    return new Promise<{ token: string; user: User }>((resolve, reject) => {
+      // Open OAuth in popup window
+      const width = 600
+      const height = 700
+      const left = (window.screen.width - width) / 2
+      const top = (window.screen.height - height) / 2
 
-    // Redirect to backend OAuth endpoint
-    // Backend will redirect to GitHub, then handle callback
-    window.location.href = `${config.public.apiUrl}/auth/github/redirect`
-  }
+      const popup = window.open(
+        `${config.public.apiUrl}/auth/github/redirect`,
+        'GitHub OAuth',
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+      )
 
-  // Handle OAuth callback from backend
-  const handleCallback = async (queryParams: URLSearchParams) => {
-    try {
-      // Extract auth data from URL hash or query params
-      // Backend should redirect to /auth/callback with token data
-      const authData = queryParams.get('auth_data')
-
-      if (!authData) {
-        throw new Error('No auth data received from backend')
+      if (!popup) {
+        reject(new Error('Failed to open popup. Please allow popups for this site.'))
+        return
       }
 
-      // Parse auth response from backend
-      const response: AuthCallbackResponse = JSON.parse(decodeURIComponent(authData))
+      // Listen for message from popup
+      const handleMessage = (event: MessageEvent) => {
+        // Verify origin - extract base URL from config
+        const apiOrigin = new URL(config.public.apiUrl).origin
 
-      // Create user object
-      const user: User = {
-        id: 0, // Backend doesn't return ID in callback
-        name: response.name,
-        email: response.email,
-        avatar_url: response.avatar
+        if (event.origin !== apiOrigin) {
+          return
+        }
+
+        // Check if it's our auth success message
+        if (event.data?.type === 'AUTH_SUCCESS') {
+          window.removeEventListener('message', handleMessage)
+
+          const authData = event.data.data as AuthCallbackResponse
+
+          // Create user object
+          const user: User = {
+            id: 0,
+            name: authData.name,
+            email: authData.email,
+            avatar_url: authData.avatar
+          }
+
+          // Store auth data
+          setAuth(authData.accessToken, user)
+
+          resolve({ token: authData.accessToken, user })
+        }
       }
 
-      // Store auth data
-      setAuth(response.accessToken, user)
+      window.addEventListener('message', handleMessage)
 
-      // Get return URL and redirect
-      const returnUrl = localStorage.getItem('auth_return_url') || '/'
-      localStorage.removeItem('auth_return_url')
-
-      await router.push(returnUrl)
-
-      return { token: response.accessToken, user }
-    } catch (error) {
-      console.error('Auth callback error:', error)
-      clearAuth()
-      throw error
-    }
+      // Check if popup was closed without completing auth
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed)
+          window.removeEventListener('message', handleMessage)
+          reject(new Error('Authentication cancelled'))
+        }
+      }, 1000)
+    })
   }
 
   // Set authentication data
@@ -148,7 +160,6 @@ export const useAuth = () => {
     // Methods
     initAuth,
     loginWithGitHub,
-    handleCallback,
     logout,
     setAuth,
     clearAuth
