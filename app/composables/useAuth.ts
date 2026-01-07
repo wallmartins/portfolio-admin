@@ -14,6 +14,11 @@ interface AuthCallbackResponse {
   avatar: string
 }
 
+// Helper to check if we're on client side (can be mocked in tests)
+export const isClient = () => {
+  return import.meta.client || typeof window !== 'undefined'
+}
+
 export const useAuth = () => {
   const config = useRuntimeConfig()
   const router = useRouter()
@@ -28,7 +33,7 @@ export const useAuth = () => {
 
   // Initialize auth from localStorage on client side
   const initAuth = () => {
-    if (import.meta.client) {
+    if (isClient()) {
       const token = localStorage.getItem('auth_token')
       const userStr = localStorage.getItem('auth_user')
 
@@ -122,7 +127,7 @@ export const useAuth = () => {
       isLoading: false
     }
 
-    if (import.meta.client) {
+    if (isClient()) {
       localStorage.setItem('auth_token', token)
       localStorage.setItem('auth_user', JSON.stringify(user))
     }
@@ -137,7 +142,7 @@ export const useAuth = () => {
       isLoading: false
     }
 
-    if (import.meta.client) {
+    if (isClient()) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
       localStorage.removeItem('auth_return_url')

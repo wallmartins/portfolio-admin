@@ -9,12 +9,23 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/image',
     '@nuxt/eslint'
+    // '@nuxtjs/sentry' // Uncomment and configure when Sentry DSN is available
   ],
 
   typescript: {
     strict: true,
     typeCheck: true
   },
+
+  // Sentry configuration (optional - uncomment when ready to use)
+  // sentry: {
+  //   dsn: process.env.SENTRY_DSN || '',
+  //   enabled: !!process.env.SENTRY_DSN,
+  //   config: {
+  //     environment: process.env.NODE_ENV || 'development',
+  //     tracesSampleRate: 1.0
+  //   }
+  // },
 
   runtimeConfig: {
     // Public keys (exposed to client)
