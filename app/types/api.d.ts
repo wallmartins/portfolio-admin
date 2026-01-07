@@ -19,11 +19,10 @@ export interface About {
 export interface Experience {
   id: number
   company: string
+  role: string
   start_date: string
   end_date?: string | null
-  title: string
-  description: string
-  locale: 'pt-BR' | 'en-US'
+  translations: ExperienceTranslation[]
   created_at: string
   updated_at: string
 }
@@ -133,9 +132,22 @@ export type CreateAboutDTO = Omit<About, 'id' | 'created_at' | 'updated_at'> & {
 
 export type UpdateAboutDTO = Partial<CreateAboutDTO>
 
-export type CreateExperienceDTO = Omit<Experience, 'id' | 'created_at' | 'updated_at'>
+export type CreateExperienceDTO = {
+  company: string
+  role: string
+  start_date: string
+  end_date?: string | null
+  translations: ExperienceTranslation[]
+}
 
-export type UpdateExperienceDTO = Partial<CreateExperienceDTO>
+export type UpdateExperienceDTO = {
+  locale: string
+  company?: string
+  role?: string
+  start_date?: string
+  end_date?: string | null
+  translations?: ExperienceTranslation[]
+}
 
 export type CreatePostDTO = {
   slug: string

@@ -4,12 +4,22 @@ import { toast } from 'vue-sonner'
 
 type Locale = 'pt-BR' | 'en-US'
 
-export const useAbout = (locale: Ref<Locale> | Locale = 'pt-BR') => {
+export const useAbout = (locale?: Ref<Locale> | Locale) => {
   const { api } = useApi()
   const queryClient = useQueryClient()
-  const currentLocale = isRef(locale) ? locale : ref(locale)
+  const currentLocale = locale ? (isRef(locale) ? locale : ref(locale)) : ref<Locale | undefined>(undefined)
 
-  // Fetch about information by locale
+  // Fetch all about entries (admin)
+  const fetchAllAbout = useQuery({
+    queryKey: ['about', 'all'],
+    queryFn: async () => {
+      const response = await api<{ data: About[] }>('/admin/about')
+      return response.data || []
+    },
+    enabled: computed(() => !currentLocale.value)
+  })
+
+  // Fetch about information by locale (public)
   const fetchAbout = useQuery({
     queryKey: ['about', currentLocale],
     queryFn: async () => {
@@ -88,9 +98,10 @@ export const useAbout = (locale: Ref<Locale> | Locale = 'pt-BR') => {
   return {
     // Queries
     about: computed(() => fetchAbout.data.value),
-    isLoading: computed(() => fetchAbout.isLoading.value),
-    isError: computed(() => fetchAbout.isError.value),
-    error: computed(() => fetchAbout.error.value),
+    abouts: computed(() => fetchAllAbout.data.value || []),
+    isLoading: computed(() => currentLocale.value ? fetchAbout.isLoading.value : fetchAllAbout.isLoading.value),
+    isError: computed(() => currentLocale.value ? fetchAbout.isError.value : fetchAllAbout.isError.value),
+    error: computed(() => currentLocale.value ? fetchAbout.error.value : fetchAllAbout.error.value),
 
     // Mutations
     createAbout,
@@ -98,7 +109,7 @@ export const useAbout = (locale: Ref<Locale> | Locale = 'pt-BR') => {
     deleteAbout,
 
     // Utilities
-    refetch: fetchAbout.refetch,
+    refetch: currentLocale.value ? fetchAbout.refetch : fetchAllAbout.refetch,
     currentLocale
   }
 }
