@@ -74,8 +74,8 @@ export interface ProjectTranslation {
 
 export interface Social {
   id: number
-  name: string
-  url: string
+  social_name: string
+  social_url: string
   icon?: string
   created_at: string
   updated_at: string
@@ -85,6 +85,7 @@ export interface Tech {
   id: number
   name: string
   slug: string
+  start_date: string
   category: 'language' | 'framework' | 'tool'
   icon?: string
   created_at: string
