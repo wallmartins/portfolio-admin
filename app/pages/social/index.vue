@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Social } from '~/types/api'
+import { Edit2, Trash2, Plus } from 'lucide-vue-next'
 
 definePageMeta({
   middleware: 'auth'
@@ -25,7 +26,7 @@ const confirmDelete = async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 min-h-full">
     <PageHeader
       title="Social Media Links"
       description="Manage your social media profiles"
@@ -37,7 +38,8 @@ const confirmDelete = async () => {
       </p>
 
       <UiButton as-child>
-        <NuxtLink to="/social/create">
+        <NuxtLink to="/social/create" class="flex items-center gap-2">
+          <Plus class="w-4 h-4" />
           Add Social Link
         </NuxtLink>
       </UiButton>
@@ -87,7 +89,8 @@ const confirmDelete = async () => {
                   size="sm"
                   as-child
                 >
-                  <NuxtLink :to="`/social/${social.id}/edit`">
+                  <NuxtLink :to="`/social/${social.id}/edit`" class="flex items-center gap-2">
+                    <Edit2 class="w-4 h-4" />
                     Edit
                   </NuxtLink>
                 </UiButton>
@@ -95,7 +98,9 @@ const confirmDelete = async () => {
                   variant="destructive"
                   size="sm"
                   @click="handleDelete(social)"
+                  class="flex items-center gap-2"
                 >
+                  <Trash2 class="w-4 h-4" />
                   Delete
                 </UiButton>
               </div>
@@ -126,7 +131,9 @@ const confirmDelete = async () => {
             variant="destructive"
             @click="confirmDelete"
             :disabled="deleteSocial.isPending.value"
+            class="flex items-center gap-2"
           >
+            <Trash2 v-if="!deleteSocial.isPending.value" class="w-4 h-4" />
             {{ deleteSocial.isPending.value ? 'Deleting...' : 'Delete' }}
           </UiButton>
         </UiDialogFooter>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { User, LogOut, Settings } from 'lucide-vue-next'
+import { User, LogOut } from 'lucide-vue-next'
+import ThemeToggle from '~/components/ui/ThemeToggle.vue'
 
 const { user, logout } = useAuth()
 
@@ -10,57 +11,46 @@ async function handleLogout() {
 </script>
 
 <template>
-  <header class="border-b bg-background sticky top-0 z-10">
-    <div class="flex items-center justify-between h-16 px-6">
-      <div class="flex items-center gap-4">
-        <h1 class="text-xl font-semibold">
-          <slot name="title">Dashboard</slot>
-        </h1>
+  <header
+    class="h-16 flex-shrink-0 border-b border-border/50 bg-card/50 backdrop-blur-sm"
+  >
+    <div class="flex h-full items-center justify-between px-6">
+      <!-- Left: User Info -->
+      <div class="flex items-center gap-3">
+        <img
+          v-if="user?.avatar_url"
+          :src="user.avatar_url"
+          :alt="user.name"
+          class="h-9 w-9 rounded-full object-cover"
+        />
+        <div
+          v-else
+          class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10"
+        >
+          <User class="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <p class="text-sm font-semibold">{{ user?.name || 'User' }}</p>
+          <p class="text-xs text-muted-foreground">
+            {{ user?.email || 'user@example.com' }}
+          </p>
+        </div>
       </div>
 
-      <div class="flex items-center gap-4">
-        <!-- User Menu -->
-        <UiDropdownMenu>
-          <UiDropdownMenuTrigger as-child>
-            <UiButton variant="ghost" size="icon" class="rounded-full">
-              <img
-                v-if="user?.avatar_url"
-                :src="user.avatar_url"
-                :alt="user.name"
-                class="w-8 h-8 rounded-full"
-              >
-              <User v-else class="w-5 h-5" />
-            </UiButton>
-          </UiDropdownMenuTrigger>
+      <!-- Right: Theme Toggle + Logout Button -->
+      <div class="flex items-center gap-2">
+        <!-- Theme Toggle -->
+        <ThemeToggle />
 
-          <UiDropdownMenuContent align="end" class="w-56">
-            <div class="flex items-center gap-2 p-2">
-              <div class="flex flex-col space-y-1">
-                <p class="text-sm font-medium">{{ user?.name || 'User' }}</p>
-                <p class="text-xs text-muted-foreground">{{ user?.email || '' }}</p>
-              </div>
-            </div>
-
-            <UiDropdownMenuSeparator />
-
-            <UiDropdownMenuItem as-child>
-              <NuxtLink to="/settings" class="flex items-center gap-2 cursor-pointer">
-                <Settings class="w-4 h-4" />
-                <span>Settings</span>
-              </NuxtLink>
-            </UiDropdownMenuItem>
-
-            <UiDropdownMenuSeparator />
-
-            <UiDropdownMenuItem
-              class="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-              @click="handleLogout"
-            >
-              <LogOut class="w-4 h-4" />
-              <span>Logout</span>
-            </UiDropdownMenuItem>
-          </UiDropdownMenuContent>
-        </UiDropdownMenu>
+        <!-- Logout Button (Icon Only) -->
+        <UiButton
+          variant="ghost"
+          size="icon"
+          @click="handleLogout"
+          title="Logout"
+        >
+          <LogOut class="h-4 w-4" />
+        </UiButton>
       </div>
     </div>
   </header>

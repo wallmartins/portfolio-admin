@@ -48,9 +48,64 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // Component auto-imports configuration
+  components: {
+    dirs: [
+      {
+        path: '~/components',
+        pathPrefix: false,
+        global: true
+      }
+    ]
+  },
+
+  // Performance optimizations
+  nitro: {
+    compressPublicAssets: true,
+    minify: true
+  },
+
+  // Image optimization
+  image: {
+    formats: ['webp', 'avif', 'png', 'jpg'],
+    quality: 80,
+    screens: {
+      xs: 320,
+      sm: 640,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1536
+    }
+  },
+
+  // Experimental features for better performance
+  experimental: {
+    payloadExtraction: false,
+    componentIslands: true,
+    viewTransition: true
+  },
+
   vite: {
     optimizeDeps: {
       include: ['@tanstack/vue-query']
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor': ['vue', '@tanstack/vue-query'],
+            'ui': ['reka-ui', 'lucide-vue-next']
+          }
+        }
+      }
+    }
+  },
+
+  // Router options for better navigation
+  router: {
+    options: {
+      scrollBehaviorType: 'smooth'
     }
   }
 })

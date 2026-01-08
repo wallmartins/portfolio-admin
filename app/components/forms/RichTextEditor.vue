@@ -2,14 +2,15 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
-import Image from '@tiptap/extension-image'
+// import Image from '@tiptap/extension-image' // Temporarily disabled due to version conflict
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight, common } from 'lowlight'
 import {
   Bold, Italic, Strikethrough, Code,
   Heading1, Heading2, Heading3,
   List, ListOrdered, Quote,
-  Undo, Redo, Link as LinkIcon, ImageIcon
+  Undo, Redo, Link as LinkIcon
+  // ImageIcon // Removed - image functionality temporarily disabled
 } from 'lucide-vue-next'
 import { watch } from 'vue'
 
@@ -41,11 +42,11 @@ const editor = useEditor({
         class: 'text-primary underline'
       }
     }),
-    Image.configure({
-      HTMLAttributes: {
-        class: 'max-w-full h-auto rounded-lg'
-      }
-    }),
+    // Image.configure({ // Temporarily disabled
+    //   HTMLAttributes: {
+    //     class: 'max-w-full h-auto rounded-lg'
+    //   }
+    // }),
     CodeBlockLowlight.configure({
       lowlight,
       HTMLAttributes: {
@@ -77,12 +78,13 @@ function addLink() {
   }
 }
 
-function addImage() {
-  const url = window.prompt('Enter image URL:')
-  if (url && editor.value) {
-    editor.value.chain().focus().setImage({ src: url }).run()
-  }
-}
+// Temporarily disabled due to TipTap Image extension conflict
+// function addImage() {
+//   const url = window.prompt('Enter image URL:')
+//   if (url && editor.value) {
+//     editor.value.chain().focus().setImage({ src: url }).run()
+//   }
+// }
 
 onBeforeUnmount(() => {
   editor.value?.destroy()
@@ -214,14 +216,15 @@ onBeforeUnmount(() => {
           <LinkIcon class="w-4 h-4" />
         </UiButton>
 
-        <UiButton
+        <!-- Image button temporarily disabled -->
+        <!-- <UiButton
           type="button"
           variant="ghost"
           size="sm"
           @click="addImage"
         >
           <ImageIcon class="w-4 h-4" />
-        </UiButton>
+        </UiButton> -->
 
         <div class="w-px h-6 bg-border mx-1" />
 

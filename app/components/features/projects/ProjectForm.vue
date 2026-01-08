@@ -3,7 +3,7 @@ import { useForm, FieldArray } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { projectSchema, type ProjectFormData } from '~/schemas/project.schema'
 import type { Project } from '~/types/api'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2, X, Save } from 'lucide-vue-next'
 
 interface Props {
   project?: Project
@@ -24,24 +24,18 @@ const imageFile = ref<File | null>(null)
 
 const { handleSubmit, resetForm, setValues, values } = useForm({
   validationSchema: toTypedSchema(projectSchema),
-  initialValues: props.project ? {
-    name: props.project.name,
-    slug: props.project.slug,
-    image: props.project.image || undefined,
-    tech_ids: props.project.techs?.map(t => t.id) || [],
-    translations: [
+  initialValues: {
+    name: props.project?.name || '',
+    slug: props.project?.slug || '',
+    image: props.project?.image || undefined,
+    tech_ids: props.project?.techs?.map(t => t.id) || [],
+    translations: props.project ? [
       {
         locale: 'pt-BR' as const,
-        title: '',
-        content: ''
+        title: props.project.title || '',
+        content: props.project.content || ''
       }
-    ]
-  } : {
-    name: '',
-    slug: '',
-    image: undefined,
-    tech_ids: [],
-    translations: [
+    ] : [
       {
         locale: 'pt-BR' as const,
         title: '',
@@ -108,10 +102,17 @@ const localeOptions = [
 ]
 
 const techOptions = computed(() => {
-  return techs.value.map(tech => ({
-    label: tech.name,
-    value: tech.id
-  }))
+  return techs.value?.map(tech => ({
+    id: tech.id,
+    name: tech.name
+  })) || []
+})
+
+const techIds = computed({
+  get: () => values.tech_ids || [],
+  set: (value) => {
+    setValues({ tech_ids: value })
+  }
 })
 </script>
 
@@ -146,7 +147,7 @@ const techOptions = computed(() => {
     <div class="space-y-2">
       <UiLabel>Technologies</UiLabel>
       <MultiSelect
-        v-model="values.tech_ids"
+        v-model="techIds"
         :options="techOptions"
         placeholder="Select technologies used in this project"
       />
@@ -261,13 +262,17 @@ const techOptions = computed(() => {
         variant="outline"
         @click="onCancel"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <X class="w-4 h-4" />
         Cancel
       </UiButton>
       <UiButton
         type="submit"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <Save v-if="!props.isLoading" class="w-4 h-4" />
         {{ props.isLoading ? 'Saving...' : (props.project ? 'Update' : 'Create') }}
       </UiButton>
     </div>

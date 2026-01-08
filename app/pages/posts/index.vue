@@ -1,10 +1,23 @@
 <script setup lang="ts">
 import type { Post } from '~/types/api'
+import { Checkbox } from '~/components/ui/checkbox'
+import { Edit2, Trash2, Plus } from 'lucide-vue-next'
 
 const { posts, isLoading, deletePost } = usePosts()
 
 const postToDelete = ref<Post | null>(null)
 const isDeleteDialogOpen = ref(false)
+
+// Bulk selection
+const {
+  selectedCount,
+  isAllSelected,
+  toggleItem,
+  toggleAll,
+  clearSelection,
+  isSelected,
+  getSelectedIds
+} = useBulkSelection<Post>()
 
 const handleDelete = (post: Post) => {
   postToDelete.value = post
@@ -19,6 +32,20 @@ const confirmDelete = async () => {
   postToDelete.value = null
 }
 
+const handleBulkDelete = async () => {
+  if (!confirm(`Are you sure you want to delete ${selectedCount.value} post(s)? This action cannot be undone.`)) {
+    return
+  }
+
+  const ids = getSelectedIds()
+  try {
+    await Promise.all(ids.map(id => deletePost.mutateAsync(Number(id))))
+    clearSelection()
+  } catch (error) {
+    console.error('Failed to delete posts:', error)
+  }
+}
+
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -29,19 +56,38 @@ const formatDate = (date: string) => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 min-h-full">
+    <!-- Bulk Actions Toolbar -->
+    <BulkActionsToolbar
+      :selected-count="selectedCount"
+      :on-delete="handleBulkDelete"
+      :on-clear="clearSelection"
+    />
+
     <PageHeader
       title="Blog Posts"
       description="Manage your blog posts and articles"
     />
 
     <div class="flex items-center justify-between">
-      <p v-if="posts.length > 0" class="text-sm text-muted-foreground">
-        {{ posts.length }} {{ posts.length === 1 ? 'post' : 'posts' }}
-      </p>
+      <div class="flex items-center gap-3">
+        <div v-if="posts.length > 0" class="flex items-center gap-2">
+          <Checkbox
+            :checked="isAllSelected"
+            @update:checked="() => toggleAll(posts)"
+          />
+          <span class="text-sm text-muted-foreground">
+            Select all
+          </span>
+        </div>
+        <p v-if="posts.length > 0" class="text-sm text-muted-foreground">
+          {{ posts.length }} {{ posts.length === 1 ? 'post' : 'posts' }}
+        </p>
+      </div>
 
       <UiButton as-child>
-        <NuxtLink to="/posts/create">
+        <NuxtLink to="/posts/create" class="flex items-center gap-2">
+          <Plus class="w-4 h-4" />
           Create Post
         </NuxtLink>
       </UiButton>
@@ -58,7 +104,21 @@ const formatDate = (date: string) => {
     />
 
     <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <UiCard v-for="post in posts" :key="post.id" class="flex flex-col overflow-hidden">
+      <UiCard
+        v-for="post in posts"
+        :key="post.id"
+        class="flex flex-col overflow-hidden relative transition-all"
+        :class="{ 'ring-2 ring-primary ring-offset-2': isSelected(post.id) }"
+      >
+        <!-- Checkbox -->
+        <div class="absolute top-3 left-3 z-10">
+          <Checkbox
+            :checked="isSelected(post.id)"
+            @update:checked="() => toggleItem(post.id)"
+            class="bg-background shadow-sm"
+          />
+        </div>
+
         <div v-if="post.image" class="aspect-video w-full overflow-hidden bg-muted">
           <img :src="post.image" :alt="post.title" class="w-full h-full object-cover" />
         </div>
@@ -98,18 +158,20 @@ const formatDate = (date: string) => {
           </div>
         </UiCardContent>
 
-        <UiCardFooter class="flex gap-2">
+        <UiCardFooter class="flex gap-3 pt-4">
           <UiButton variant="outline" size="sm" class="flex-1" as-child>
-            <NuxtLink :to="`/posts/${post.id}/edit`">
+            <NuxtLink :to="`/posts/${post.id}/edit`" class="flex items-center gap-2">
+              <Edit2 class="w-4 h-4" />
               Edit
             </NuxtLink>
           </UiButton>
           <UiButton
             variant="destructive"
             size="sm"
-            class="flex-1"
+            class="flex-1 flex items-center gap-2"
             @click="handleDelete(post)"
           >
+            <Trash2 class="w-4 h-4" />
             Delete
           </UiButton>
         </UiCardFooter>
@@ -137,7 +199,9 @@ const formatDate = (date: string) => {
             variant="destructive"
             @click="confirmDelete"
             :disabled="deletePost.isPending.value"
+            class="flex items-center gap-2"
           >
+            <Trash2 v-if="!deletePost.isPending.value" class="w-4 h-4" />
             {{ deletePost.isPending.value ? 'Deleting...' : 'Delete' }}
           </UiButton>
         </UiDialogFooter>

@@ -9,6 +9,32 @@ export default {
     './app/app.vue',
     './app/error.vue'
   ],
+  safelist: [
+    // Critical layout classes
+    'fixed',
+    'inset-0',
+    'flex',
+    'flex-1',
+    'flex-col',
+    'flex-shrink-0',
+    'min-w-0',
+    'overflow-hidden',
+    'overflow-y-auto',
+    'overflow-x-hidden',
+    'bg-background',
+    'bg-card',
+    'border-r',
+    'border-b',
+    'border-border',
+    'w-64',
+    'h-16',
+    'h-full',
+    'min-h-full',
+    'backdrop-blur-sm',
+    // Opacity variations for backgrounds
+    'bg-card/50',
+    'border-border/50'
+  ],
   theme: {
     extend: {
       colors: {
@@ -50,6 +76,36 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)'
+      },
+      boxShadow: {
+        'custom-sm': 'var(--shadow-sm)',
+        'custom-md': 'var(--shadow-md)',
+        'custom-lg': 'var(--shadow-lg)',
+        'custom-xl': 'var(--shadow-xl)'
+      },
+      animation: {
+        'slide-in-right': 'slideInRight 0.3s ease-out',
+        'slide-out-right': 'slideOutRight 0.3s ease-in',
+        'fade-in': 'fadeIn 0.2s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out'
+      },
+      keyframes: {
+        slideInRight: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' }
+        },
+        slideOutRight: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' }
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        },
+        scaleIn: {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' }
+        }
       }
     }
   },

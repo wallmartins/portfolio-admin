@@ -4,48 +4,65 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 14% 96%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217 91% 95%;
+    --accent-foreground: 217 91% 60%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 217 91% 60%;
     --radius: 0.5rem;
+
+    /* Shadows - Clean & Subtle */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Sidebar */
+    --sidebar-width: 16rem;
+    --sidebar-collapsed-width: 5rem;
+    --sidebar-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217 91% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 217 91% 65%;
+
+    /* Shadows for Dark Mode */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 10px 10px -5px rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -53,7 +70,82 @@
   * {
     @apply border-border;
   }
+
+  html,
   body {
     @apply bg-background text-foreground;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #__nuxt {
+    height: 100%;
+  }
+}
+
+@layer components {
+  /* Shadow Utility Classes */
+  .shadow-custom-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .shadow-custom-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-custom-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .shadow-custom-xl {
+    box-shadow: var(--shadow-xl);
+  }
+
+  /* Performance optimizations */
+  .sidebar-transition {
+    will-change: width;
+  }
+}
+
+@layer utilities {
+  /* Typography Utilities */
+  .text-display {
+    @apply text-5xl font-bold tracking-tight;
+  }
+
+  .text-heading {
+    @apply text-3xl font-bold;
+  }
+
+  /* Focus Utilities */
+  .focus-primary {
+    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+}
+
+/* Accessibility: Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    @apply font-semibold tracking-tight;
+  }
+
+  h1 {
+    @apply text-4xl;
+  }
+
+  p {
+    @apply leading-relaxed;
   }
 }

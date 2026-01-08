@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Experience } from '~/types/api'
-import { LayoutList, Clock } from 'lucide-vue-next'
+import { LayoutList, Clock, Edit2, Trash2, Plus } from 'lucide-vue-next'
 
 const { experiences, isLoading, deleteExperience } = useExperiences()
 
@@ -38,7 +38,7 @@ const formatDate = (date: string) => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 min-h-full">
     <PageHeader
       title="Experiences"
       description="Manage your professional experience history"
@@ -71,7 +71,8 @@ const formatDate = (date: string) => {
       </div>
 
       <UiButton as-child>
-        <NuxtLink to="/experiences/create">
+        <NuxtLink to="/experiences/create" class="flex items-center gap-2">
+          <Plus class="w-4 h-4" />
           Add Experience
         </NuxtLink>
       </UiButton>
@@ -132,7 +133,8 @@ const formatDate = (date: string) => {
                     size="sm"
                     as-child
                   >
-                    <NuxtLink :to="`/experiences/${experience.id}/edit`">
+                    <NuxtLink :to="`/experiences/${experience.id}/edit`" class="flex items-center gap-2">
+                      <Edit2 class="w-4 h-4" />
                       Edit
                     </NuxtLink>
                   </UiButton>
@@ -140,7 +142,9 @@ const formatDate = (date: string) => {
                     variant="destructive"
                     size="sm"
                     @click="handleDelete(experience)"
+                    class="flex items-center gap-2"
                   >
+                    <Trash2 class="w-4 h-4" />
                     Delete
                   </UiButton>
                 </div>
@@ -172,7 +176,9 @@ const formatDate = (date: string) => {
             variant="destructive"
             @click="confirmDelete"
             :disabled="deleteExperience.isPending.value"
+            class="flex items-center gap-2"
           >
+            <Trash2 v-if="!deleteExperience.isPending.value" class="w-4 h-4" />
             {{ deleteExperience.isPending.value ? 'Deleting...' : 'Delete' }}
           </UiButton>
         </UiDialogFooter>
