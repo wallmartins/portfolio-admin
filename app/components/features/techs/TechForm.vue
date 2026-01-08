@@ -3,6 +3,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { techSchema, type TechFormData } from '~/schemas/tech.schema'
 import type { Tech } from '~/types/api'
+import { X, Save } from 'lucide-vue-next'
 
 interface Props {
   tech?: Tech
@@ -140,13 +141,17 @@ const categoryOptions = [
         variant="outline"
         @click="onCancel"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <X class="w-4 h-4" />
         Cancel
       </UiButton>
       <UiButton
         type="submit"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <Save v-if="!props.isLoading" class="w-4 h-4" />
         {{ props.isLoading ? 'Saving...' : (props.tech ? 'Update' : 'Create') }}
       </UiButton>
     </div>

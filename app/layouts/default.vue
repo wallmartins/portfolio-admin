@@ -1,22 +1,22 @@
-<template>
-  <div class="min-h-screen bg-background">
-    <div class="flex h-screen">
-      <!-- Sidebar placeholder -->
-      <aside class="w-64 border-r bg-card">
-        <div class="p-4">
-          <h2 class="text-lg font-semibold">Portfolio Admin</h2>
-        </div>
-        <nav class="space-y-1 p-2">
-          <!-- Navigation will be added in later phases -->
-        </nav>
-      </aside>
+<script setup lang="ts">
+// Import components explicitly to ensure they load
+import Sidebar from '~/components/layouts/Sidebar.vue'
+import Header from '~/components/layouts/Header.vue'
+</script>
 
-      <!-- Main content -->
-      <main class="flex-1 overflow-y-auto">
-        <div class="container mx-auto p-6">
+<template>
+  <div class="fixed inset-0 flex min-h-screen w-screen flex-1 bg-background">
+    <!-- Sidebar -->
+    <Sidebar />
+
+    <div class="h-screen w-full">
+      <Header />
+      <main class="flex-1 overflow-y-auto overflow-x-hidden">
+        <div class="mx-auto max-w-[1400px] px-8 py-8">
           <slot />
         </div>
       </main>
     </div>
+    <!-- Main content -->
   </div>
 </template>

@@ -3,7 +3,7 @@ import { useForm, FieldArray } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { experienceSchema, type ExperienceFormData } from '~/schemas/experience.schema'
 import type { Experience } from '~/types/api'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2, X, Save } from 'lucide-vue-next'
 
 interface Props {
   experience?: Experience
@@ -205,13 +205,17 @@ const localeOptions = [
         variant="outline"
         @click="onCancel"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <X class="w-4 h-4" />
         Cancel
       </UiButton>
       <UiButton
         type="submit"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <Save v-if="!props.isLoading" class="w-4 h-4" />
         {{ props.isLoading ? 'Saving...' : (props.experience ? 'Update' : 'Create') }}
       </UiButton>
     </div>

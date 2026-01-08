@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { About } from '~/types/api'
+import { Edit2, Trash2, Plus } from 'lucide-vue-next'
 
 const { abouts, isLoading, deleteAbout } = useAbout()
 
@@ -25,7 +26,7 @@ const getLocaleBadgeVariant = (locale: string) => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 min-h-full">
     <PageHeader
       title="About"
       description="Manage your personal information"
@@ -37,7 +38,8 @@ const getLocaleBadgeVariant = (locale: string) => {
       </p>
 
       <UiButton as-child>
-        <NuxtLink to="/about/create">
+        <NuxtLink to="/about/create" class="flex items-center gap-2">
+          <Plus class="w-4 h-4" />
           Add About Entry
         </NuxtLink>
       </UiButton>
@@ -86,7 +88,8 @@ const getLocaleBadgeVariant = (locale: string) => {
                   size="sm"
                   as-child
                 >
-                  <NuxtLink :to="`/about/${about.id}/edit`">
+                  <NuxtLink :to="`/about/${about.id}/edit`" class="flex items-center gap-2">
+                    <Edit2 class="w-4 h-4" />
                     Edit
                   </NuxtLink>
                 </UiButton>
@@ -94,7 +97,9 @@ const getLocaleBadgeVariant = (locale: string) => {
                   variant="destructive"
                   size="sm"
                   @click="handleDelete(about)"
+                  class="flex items-center gap-2"
                 >
+                  <Trash2 class="w-4 h-4" />
                   Delete
                 </UiButton>
               </div>
@@ -125,7 +130,9 @@ const getLocaleBadgeVariant = (locale: string) => {
             variant="destructive"
             @click="confirmDelete"
             :disabled="deleteAbout.isPending.value"
+            class="flex items-center gap-2"
           >
+            <Trash2 v-if="!deleteAbout.isPending.value" class="w-4 h-4" />
             {{ deleteAbout.isPending.value ? 'Deleting...' : 'Delete' }}
           </UiButton>
         </UiDialogFooter>

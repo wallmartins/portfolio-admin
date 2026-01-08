@@ -3,6 +3,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { aboutSchema, type AboutFormData } from '~/schemas/about.schema'
 import type { About } from '~/types/api'
+import { X, Save } from 'lucide-vue-next'
 
 interface Props {
   about?: About
@@ -127,13 +128,17 @@ const localeOptions = [
         variant="outline"
         @click="onCancel"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <X class="w-4 h-4" />
         Cancel
       </UiButton>
       <UiButton
         type="submit"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <Save v-if="!props.isLoading" class="w-4 h-4" />
         {{ props.isLoading ? 'Saving...' : (props.about ? 'Update' : 'Create') }}
       </UiButton>
     </div>

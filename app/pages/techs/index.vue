@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { Tech } from '~/types/api'
+import { Checkbox } from '~/components/ui/checkbox'
+import { Edit2, Trash2, Plus } from 'lucide-vue-next'
 
 definePageMeta({
   middleware: 'auth'
@@ -15,6 +17,17 @@ const filteredTechs = computed(() => {
   }
   return techs.value.filter((tech: Tech) => tech.category === selectedCategory.value)
 })
+
+// Bulk selection
+const {
+  selectedCount,
+  isAllSelected,
+  toggleItem,
+  toggleAll,
+  clearSelection,
+  isSelected,
+  getSelectedIds
+} = useBulkSelection<Tech>()
 
 const categoryOptions = [
   { label: 'All Categories', value: 'all' },
@@ -39,6 +52,20 @@ const confirmDelete = async () => {
   techToDelete.value = null
 }
 
+const handleBulkDelete = async () => {
+  if (!confirm(`Are you sure you want to delete ${selectedCount.value} technology(ies)? This action cannot be undone.`)) {
+    return
+  }
+
+  const ids = getSelectedIds()
+  try {
+    await Promise.all(ids.map(id => deleteTech.mutateAsync(Number(id))))
+    clearSelection()
+  } catch (error) {
+    console.error('Failed to delete technologies:', error)
+  }
+}
+
 const getCategoryBadgeVariant = (category: string) => {
   switch (category) {
     case 'language':
@@ -54,7 +81,14 @@ const getCategoryBadgeVariant = (category: string) => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 min-h-full">
+    <!-- Bulk Actions Toolbar -->
+    <BulkActionsToolbar
+      :selected-count="selectedCount"
+      :on-delete="handleBulkDelete"
+      :on-clear="clearSelection"
+    />
+
     <PageHeader
       title="Technologies"
       description="Manage your technology stack and skills"
@@ -83,7 +117,8 @@ const getCategoryBadgeVariant = (category: string) => {
       </div>
 
       <UiButton as-child>
-        <NuxtLink to="/techs/create">
+        <NuxtLink to="/techs/create" class="flex items-center gap-2">
+          <Plus class="w-4 h-4" />
           Add Technology
         </NuxtLink>
       </UiButton>
@@ -109,6 +144,12 @@ const getCategoryBadgeVariant = (category: string) => {
       <UiTable>
         <UiTableHeader>
           <UiTableRow>
+            <UiTableHead class="w-12">
+              <Checkbox
+                :checked="isAllSelected"
+                @update:checked="() => toggleAll(filteredTechs)"
+              />
+            </UiTableHead>
             <UiTableHead>Name</UiTableHead>
             <UiTableHead>Slug</UiTableHead>
             <UiTableHead>Category</UiTableHead>
@@ -117,7 +158,17 @@ const getCategoryBadgeVariant = (category: string) => {
           </UiTableRow>
         </UiTableHeader>
         <UiTableBody>
-          <UiTableRow v-for="tech in filteredTechs" :key="tech.id">
+          <UiTableRow
+            v-for="tech in filteredTechs"
+            :key="tech.id"
+            :class="{ 'bg-primary/5': isSelected(tech.id) }"
+          >
+            <UiTableCell>
+              <Checkbox
+                :checked="isSelected(tech.id)"
+                @update:checked="() => toggleItem(tech.id)"
+              />
+            </UiTableCell>
             <UiTableCell class="font-medium">{{ tech.name }}</UiTableCell>
             <UiTableCell>
               <code class="text-xs bg-muted px-2 py-1 rounded">{{ tech.slug }}</code>
@@ -138,7 +189,8 @@ const getCategoryBadgeVariant = (category: string) => {
                   size="sm"
                   as-child
                 >
-                  <NuxtLink :to="`/techs/${tech.id}/edit`">
+                  <NuxtLink :to="`/techs/${tech.id}/edit`" class="flex items-center gap-2">
+                    <Edit2 class="w-4 h-4" />
                     Edit
                   </NuxtLink>
                 </UiButton>
@@ -146,7 +198,9 @@ const getCategoryBadgeVariant = (category: string) => {
                   variant="destructive"
                   size="sm"
                   @click="handleDelete(tech)"
+                  class="flex items-center gap-2"
                 >
+                  <Trash2 class="w-4 h-4" />
                   Delete
                 </UiButton>
               </div>
@@ -177,7 +231,9 @@ const getCategoryBadgeVariant = (category: string) => {
             variant="destructive"
             @click="confirmDelete"
             :disabled="deleteTech.isPending.value"
+            class="flex items-center gap-2"
           >
+            <Trash2 v-if="!deleteTech.isPending.value" class="w-4 h-4" />
             {{ deleteTech.isPending.value ? 'Deleting...' : 'Delete' }}
           </UiButton>
         </UiDialogFooter>

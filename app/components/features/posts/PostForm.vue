@@ -3,7 +3,7 @@ import { useForm, FieldArray } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { postSchema, type PostFormData } from '~/schemas/post.schema'
 import type { Post } from '~/types/api'
-import { Plus, Trash2 } from 'lucide-vue-next'
+import { Plus, Trash2, X, Save } from 'lucide-vue-next'
 
 interface Props {
   post?: Post
@@ -24,23 +24,18 @@ const imageFile = ref<File | null>(null)
 
 const { handleSubmit, resetForm, setValues, values } = useForm({
   validationSchema: toTypedSchema(postSchema),
-  initialValues: props.post ? {
-    slug: props.post.slug,
-    image: props.post.image || undefined,
-    tech_ids: props.post.techs?.map(t => t.id) || [],
-    translations: [
+  initialValues: {
+    slug: props.post?.slug || '',
+    image: props.post?.image || undefined,
+    tech_ids: props.post?.techs?.map(t => t.id) || [],
+    translations: props.post ? [
       {
         locale: 'pt-BR' as const,
-        title: '',
-        subtitle: '',
-        content: ''
+        title: props.post.title || '',
+        subtitle: props.post.subtitle || '',
+        content: props.post.content || ''
       }
-    ]
-  } : {
-    slug: '',
-    image: undefined,
-    tech_ids: [],
-    translations: [
+    ] : [
       {
         locale: 'pt-BR' as const,
         title: '',
@@ -108,10 +103,17 @@ const localeOptions = [
 ]
 
 const techOptions = computed(() => {
-  return techs.value.map(tech => ({
-    label: tech.name,
-    value: tech.id
-  }))
+  return techs.value?.map(tech => ({
+    id: tech.id,
+    name: tech.name
+  })) || []
+})
+
+const techIds = computed({
+  get: () => values.tech_ids || [],
+  set: (value) => {
+    setValues({ tech_ids: value })
+  }
 })
 </script>
 
@@ -138,7 +140,7 @@ const techOptions = computed(() => {
     <div class="space-y-2">
       <UiLabel>Technologies</UiLabel>
       <MultiSelect
-        v-model="values.tech_ids"
+        v-model="techIds"
         :options="techOptions"
         placeholder="Select technologies used in this post"
       />
@@ -260,13 +262,17 @@ const techOptions = computed(() => {
         variant="outline"
         @click="onCancel"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <X class="w-4 h-4" />
         Cancel
       </UiButton>
       <UiButton
         type="submit"
         :disabled="props.isLoading"
+        class="flex items-center gap-2"
       >
+        <Save v-if="!props.isLoading" class="w-4 h-4" />
         {{ props.isLoading ? 'Saving...' : (props.post ? 'Update' : 'Create') }}
       </UiButton>
     </div>

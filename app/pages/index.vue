@@ -1,225 +1,241 @@
 <script setup lang="ts">
-import { FileText, FolderKanban, Wrench, Link2 } from 'lucide-vue-next'
+import {
+  FileText,
+  FolderKanban,
+  Wrench,
+  Link2,
+  Briefcase,
+  User,
+  TrendingUp,
+  ArrowRight
+} from 'lucide-vue-next'
 
 definePageMeta({
   middleware: ['auth']
 })
 
-// Fetch data from composables
-const { posts, meta: postsMeta, isLoading: postsLoading } = usePosts({ locale: 'pt-BR' })
-const { projects, meta: projectsMeta, isLoading: projectsLoading } = useProjects({ locale: 'pt-BR' })
-const { techs, isLoading: techsLoading } = useTechs()
-const { socialLinks, isLoading: socialsLoading } = useSocial()
+// Fetch ALL 6 resources
+const { meta: postsMeta } = usePosts({ locale: 'pt-BR' })
+const { meta: projectsMeta } = useProjects({ locale: 'pt-BR' })
+const { techs } = useTechs()
+const { socialLinks } = useSocial()
+const { experiences } = useExperiences()
+const { abouts } = useAbout()
 
-// Calculate stats
+// Inline stats
 const stats = computed(() => [
   {
-    title: 'Total Posts',
-    value: postsMeta.value?.total || 0,
-    icon: FileText,
-    description: 'Published blog posts',
-    trend: {
-      value: 12,
-      isPositive: true
-    }
+    label: 'Total Posts',
+    value: `$${postsMeta.value?.total || 0}`,
+    icon: TrendingUp,
+    iconColor: 'text-green-600',
+    bgColor: 'bg-green-50 dark:bg-green-950'
   },
   {
-    title: 'Total Projects',
-    value: projectsMeta.value?.total || 0,
-    icon: FolderKanban,
-    description: 'Portfolio projects',
-    trend: {
-      value: 8,
-      isPositive: true
-    }
+    label: 'Total Projects',
+    value: `$${projectsMeta.value?.total || 0}`,
+    icon: TrendingUp,
+    iconColor: 'text-blue-600',
+    bgColor: 'bg-blue-50 dark:bg-blue-950'
   },
   {
-    title: 'Technologies',
-    value: techs.value?.length || 0,
-    icon: Wrench,
-    description: 'Tech stack items'
-  },
-  {
-    title: 'Social Links',
-    value: socialLinks.value?.length || 0,
-    icon: Link2,
-    description: 'Connected platforms'
+    label: 'Page Views',
+    value: '120 times',
+    icon: TrendingUp,
+    iconColor: 'text-amber-600',
+    bgColor: 'bg-amber-50 dark:bg-amber-950'
   }
 ])
-
-// Mock activity data (since we don't have a real activity endpoint)
-const recentActivities = computed(() => {
-  const activities: any[] = []
-
-  // Add recent posts
-  posts.value?.slice(0, 3).forEach((post: any) => {
-    activities.push({
-      id: `post-${post.id}`,
-      type: 'post',
-      action: 'created',
-      title: post.title || 'Untitled Post',
-      timestamp: new Date(post.created_at || Date.now())
-    })
-  })
-
-  // Add recent projects
-  projects.value?.slice(0, 2).forEach((project: any) => {
-    activities.push({
-      id: `project-${project.id}`,
-      type: 'project',
-      action: 'created',
-      title: project.name || 'Untitled Project',
-      timestamp: new Date(project.created_at || Date.now())
-    })
-  })
-
-  // Sort by timestamp descending
-  return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-})
-
-const isLoading = computed(() =>
-  postsLoading.value || projectsLoading.value || techsLoading.value || socialsLoading.value
-)
 </script>
 
 <template>
-  <div class="container mx-auto py-8 px-4 space-y-8">
-    <!-- Header -->
-    <div>
-      <h1 class="text-3xl font-bold tracking-tight">Dashboard</h1>
-      <p class="text-muted-foreground mt-2">
-        Welcome back! Here's an overview of your portfolio.
+  <div class="min-h-screen space-y-6">
+    <!-- Breadcrumbs -->
+    <Breadcrumbs :items="[{ label: 'Home' }]" />
+
+    <!-- Page Header -->
+    <div class="space-y-1">
+      <p class="text-sm text-muted-foreground">
+        Account details overview and analytics
       </p>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <UiCard v-for="i in 4" :key="i" class="animate-pulse">
-        <UiCardHeader class="space-y-0 pb-2">
-          <div class="h-4 w-24 bg-muted rounded"></div>
-        </UiCardHeader>
-        <UiCardContent>
-          <div class="h-8 w-16 bg-muted rounded"></div>
-        </UiCardContent>
+    <!-- Hero Section with CTA -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <!-- Large Blue CTA Card -->
+      <UiCard
+        class="border-0 bg-gradient-to-br from-primary via-primary to-blue-700 p-8 text-primary-foreground shadow-lg lg:col-span-2"
+      >
+        <div class="space-y-6">
+          <div class="space-y-3">
+            <h2 class="text-3xl font-bold">
+              Let's create content for your amazing portfolio!
+            </h2>
+            <p class="max-w-md text-sm text-primary-foreground/90">
+              Quisque venenatis vitae est ornare molestie elit urna
+            </p>
+          </div>
+          <UiButton variant="secondary" size="lg" class="shadow-md">
+            Go for it!
+          </UiButton>
+        </div>
+      </UiCard>
+
+      <!-- Recent Activity -->
+      <UiCard class="p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-sm font-semibold">Recent Activity</h3>
+          <NuxtLink
+            to="/posts/create"
+            class="flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            Create New
+            <ArrowRight class="h-3 w-3" />
+          </NuxtLink>
+        </div>
+        <div class="space-y-3">
+          <div
+            v-for="i in 3"
+            :key="i"
+            class="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition-colors hover:bg-accent/50"
+          >
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10"
+            >
+              <FileText class="h-5 w-5 text-primary" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium">New Post Created</p>
+              <p class="text-xs text-muted-foreground">Today, 2:30 PM</p>
+            </div>
+          </div>
+        </div>
       </UiCard>
     </div>
 
-    <!-- Stats Cards -->
-    <div v-else class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <StatsCard
-        v-for="stat in stats"
-        :key="stat.title"
-        :title="stat.title"
-        :value="stat.value"
-        :icon="stat.icon"
-        :description="stat.description"
-        :trend="stat.trend"
-      />
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="grid gap-6 lg:grid-cols-2">
-      <!-- Quick Actions -->
-      <QuickActions />
-
-      <!-- Recent Activity -->
-      <ActivityFeed :activities="recentActivities" :max-items="5" />
-    </div>
-
-    <!-- Recent Posts Preview -->
-    <div v-if="posts.length > 0" class="space-y-4">
+    <!-- Last Transaction Section -->
+    <div class="space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold tracking-tight">Recent Posts</h2>
-        <NuxtLink to="/posts" class="text-sm text-primary hover:underline">
-          View all
+        <h2 class="text-xl font-bold">Last Transaction</h2>
+        <NuxtLink
+          to="/posts"
+          class="flex items-center gap-1 text-sm text-primary hover:underline"
+        >
+          See Details
+          <ArrowRight class="h-4 w-4" />
         </NuxtLink>
       </div>
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink
-          v-for="post in posts.slice(0, 3)"
-          :key="post.id"
-          :to="`/posts/${post.id}/edit`"
-          class="group"
+
+      <!-- Stats Inline -->
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div
+          v-for="stat in stats"
+          :key="stat.label"
+          class="flex items-center gap-4"
         >
-          <UiCard class="hover:shadow-md transition-shadow">
-            <UiCardHeader>
-              <UiCardTitle class="line-clamp-2 group-hover:text-primary transition-colors">
-                {{ post.title || 'Untitled Post' }}
-              </UiCardTitle>
-              <UiCardDescription class="line-clamp-2">
-                {{ post.subtitle || 'No subtitle' }}
-              </UiCardDescription>
-            </UiCardHeader>
-            <UiCardContent>
-              <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <FileText class="h-4 w-4" />
-                <span>{{ post.slug }}</span>
-              </div>
-            </UiCardContent>
-          </UiCard>
-        </NuxtLink>
+          <div
+            :class="[
+              'flex h-12 w-12 items-center justify-center rounded-lg',
+              stat.bgColor
+            ]"
+          >
+            <component :is="stat.icon" :class="['h-6 w-6', stat.iconColor]" />
+          </div>
+          <div>
+            <p class="text-2xl font-bold">{{ stat.value }}</p>
+            <p class="text-xs uppercase tracking-wide text-muted-foreground">
+              {{ stat.label }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Recent Projects Preview -->
-    <div v-if="projects.length > 0" class="space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold tracking-tight">Recent Projects</h2>
-        <NuxtLink to="/projects" class="text-sm text-primary hover:underline">
-          View all
-        </NuxtLink>
-      </div>
-      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink
-          v-for="project in projects.slice(0, 3)"
-          :key="project.id"
-          :to="`/projects/${project.id}/edit`"
-          class="group"
+    <!-- Grid of Resources -->
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+      <NuxtLink to="/posts" class="group">
+        <UiCard
+          class="cursor-pointer p-6 text-center transition-all hover:border-primary/20"
         >
-          <UiCard class="hover:shadow-md transition-shadow">
-            <UiCardHeader>
-              <UiCardTitle class="line-clamp-2 group-hover:text-primary transition-colors">
-                {{ project.name || 'Untitled Project' }}
-              </UiCardTitle>
-              <UiCardDescription class="line-clamp-2">
-                {{ project.title || 'No description' }}
-              </UiCardDescription>
-            </UiCardHeader>
-            <UiCardContent>
-              <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <FolderKanban class="h-4 w-4" />
-                <span>{{ project.slug }}</span>
-              </div>
-            </UiCardContent>
-          </UiCard>
-        </NuxtLink>
-      </div>
-    </div>
+          <div
+            class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-50 dark:bg-purple-950"
+          >
+            <FileText class="h-6 w-6 text-purple-600" />
+          </div>
+          <p class="text-2xl font-bold">{{ postsMeta?.total || 0 }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">Posts</p>
+        </UiCard>
+      </NuxtLink>
 
-    <!-- Empty State -->
-    <div
-      v-if="!isLoading && posts.length === 0 && projects.length === 0"
-      class="text-center py-12 space-y-4"
-    >
-      <div class="text-6xl">📝</div>
-      <h3 class="text-xl font-semibold">Start creating content</h3>
-      <p class="text-muted-foreground max-w-md mx-auto">
-        Your portfolio is empty. Create your first post or project to get started.
-      </p>
-      <div class="flex items-center justify-center gap-4 pt-4">
-        <NuxtLink to="/posts/create">
-          <UiButton>
-            <FileText class="mr-2 h-4 w-4" />
-            Create Post
-          </UiButton>
-        </NuxtLink>
-        <NuxtLink to="/projects/create">
-          <UiButton variant="outline">
-            <FolderKanban class="mr-2 h-4 w-4" />
-            Create Project
-          </UiButton>
-        </NuxtLink>
-      </div>
+      <NuxtLink to="/projects" class="group">
+        <UiCard
+          class="cursor-pointer p-6 text-center transition-all hover:border-primary/20"
+        >
+          <div
+            class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950"
+          >
+            <FolderKanban class="h-6 w-6 text-blue-600" />
+          </div>
+          <p class="text-2xl font-bold">{{ projectsMeta?.total || 0 }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">Projects</p>
+        </UiCard>
+      </NuxtLink>
+
+      <NuxtLink to="/techs" class="group">
+        <UiCard
+          class="cursor-pointer p-6 text-center transition-all hover:border-primary/20"
+        >
+          <div
+            class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950"
+          >
+            <Wrench class="h-6 w-6 text-amber-600" />
+          </div>
+          <p class="text-2xl font-bold">{{ techs?.length || 0 }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">Technologies</p>
+        </UiCard>
+      </NuxtLink>
+
+      <NuxtLink to="/experiences" class="group">
+        <UiCard
+          class="cursor-pointer p-6 text-center transition-all hover:border-primary/20"
+        >
+          <div
+            class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950"
+          >
+            <Briefcase class="h-6 w-6 text-green-600" />
+          </div>
+          <p class="text-2xl font-bold">{{ experiences?.length || 0 }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">Experiences</p>
+        </UiCard>
+      </NuxtLink>
+
+      <NuxtLink to="/social" class="group">
+        <UiCard
+          class="cursor-pointer p-6 text-center transition-all hover:border-primary/20"
+        >
+          <div
+            class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-pink-50 dark:bg-pink-950"
+          >
+            <Link2 class="h-6 w-6 text-pink-600" />
+          </div>
+          <p class="text-2xl font-bold">{{ socialLinks?.length || 0 }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">Social</p>
+        </UiCard>
+      </NuxtLink>
+
+      <NuxtLink to="/about" class="group">
+        <UiCard
+          class="cursor-pointer p-6 text-center transition-all hover:border-primary/20"
+        >
+          <div
+            class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-teal-50 dark:bg-teal-950"
+          >
+            <User class="h-6 w-6 text-teal-600" />
+          </div>
+          <p class="text-2xl font-bold">{{ abouts?.length || 0 }}</p>
+          <p class="mt-1 text-xs text-muted-foreground">About</p>
+        </UiCard>
+      </NuxtLink>
     </div>
   </div>
 </template>
